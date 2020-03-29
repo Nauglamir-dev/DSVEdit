@@ -1000,13 +1000,32 @@ class SpriteEditor < Qt::Dialog
   def export_sprite_frames_as_png
     return if @sprite.nil?
     
+    # @sprite.animations.each do |animation|
+    #   puts(animation)
+    # end
+
+    # @sprite.frames.each do |frame|
+    #   puts(frame)
+    # end
+
     output_folder = "./gfx/exported_sprites/#{sprite_name}"
     FileUtils.mkdir_p(output_folder)
     
     chunky_frames, _ = @renderer.render_sprite(@sprite_info, override_part_palette_index: @override_part_palette_index, one_dimensional_mode: @one_dimensional_render_mode, transparent_trails: @transparent_trails)
     chunky_frames.each_with_index do |chunky_frame, i|
+      animation_name = "NONE"
+
+      @sprite.animations.each_with_index do |animation, j|
+        animation.frame_delays.each do |frame_delay|
+          if frame_delay.frame_index == i
+            animation_name = "%02X" % j
+          end
+        end
+      end
+
+      hex_name = "%02X" % i
       type_name = ""
-      filename = "%s/frame%03X.png" % [output_folder, i]
+      filename = "#{output_folder}/anim_#{animation_name}_frame_#{hex_name}.png"
       chunky_frame.save(filename, :fast_rgba)
     end
     
